@@ -351,10 +351,10 @@ def train():
                             print('Deleting old save...')
                             os.remove(latest)
 
-            output = (output>0.5).float()
-            correct = (output == masks).float().sum()
-            print('Correct: ', correct)
-            writer.add_scalar('loss', total, epoch)
+            # output = (output>0.5).float()
+            # correct = (output == masks).float().sum()
+            # print('Correct: ', correct)
+            # writer.add_scalar('loss', total, epoch)
             
             # This is done per epoch
             # if args.validation_epoch > 0:
@@ -362,7 +362,7 @@ def train():
             #         print('Computing validation map for epoch: ', epoch)
             #         compute_validation_map(yolact_net, val_dataset)
 
-            print('Epoch ', epoch, ' completed successfully')
+            # print('Epoch ', epoch, ' completed successfully')
             time2= time.time()
             print('Epoch ', epoch, ' took ', (time2-time1), ' seconds')
     except KeyboardInterrupt:
