@@ -255,8 +255,6 @@ def train():
     # try-except so you can use ctrl+c to save early and stop training
     try:
         for epoch in range(num_epochs):
-            print("Epoch ", epoch, " started")
-            time1= time.time()
             # Resume from start_iter
             if (epoch+1)*epoch_size < iteration:
                 continue
@@ -351,20 +349,6 @@ def train():
                             print('Deleting old save...')
                             os.remove(latest)
 
-            # output = (output>0.5).float()
-            # correct = (output == masks).float().sum()
-            # print('Correct: ', correct)
-            # writer.add_scalar('loss', total, epoch)
-            
-            # This is done per epoch
-            # if args.validation_epoch > 0:
-            #     if epoch % args.validation_epoch == 0 and epoch > 0:
-            #         print('Computing validation map for epoch: ', epoch)
-            #         compute_validation_map(yolact_net, val_dataset)
-
-            # print('Epoch ', epoch, ' completed successfully')
-            time2= time.time()
-            print('Epoch ', epoch, ' took ', (time2-time1), ' seconds')
     except KeyboardInterrupt:
         print('Stopping early. Saving network...')
         
