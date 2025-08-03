@@ -109,12 +109,12 @@ dataset_base = Config({
     'name': 'Base Dataset',
 
     # Training images and annotations
-    'train_images': '/your/path/to/dataset/train_folder/',
-    'train_info':   '/your/path/to/dataset/train_folder/train.json',
+    'train_images': '',
+    'train_info':   '',
 
     # Validation images and annotations.
-    'valid_images': '/your/path/to/dataset/valid_folder/',
-    'valid_info':   '/your/path/to/dataset/valid_folder/val.json',
+    'valid_images': '',
+    'valid_info':   '',
 
     # Whether or not to load GT. If this is False, eval.py quantitative evaluation won't work.
     'has_gt': True,
@@ -171,6 +171,57 @@ pascal_sbd_dataset = dataset_base.copy({
 
     'class_names': PASCAL_CLASSES,
 })
+
+from pathlib import Path
+
+def get_dataset_config():
+    """
+    Create a platform-independent dataset configuration.
+    This function automatically detects the yolact root directory and 
+    builds appropriate paths for any operating system.
+    
+    Script location: yolact/data/config.py
+    """
+    
+    # Get the directory where this script is located (yolact/data/)
+    script_dir = Path(__file__).parent
+    
+    # Since this script is in yolact/data/, go up one level to get yolact root
+    yolact_root = script_dir.parent
+    
+    # Verify this is actually the yolact root by checking for dataset directory
+    if not (yolact_root / "dataset").exists():
+        # Fallback: Auto-find yolact root (most robust)
+        current = script_dir
+        while current != current.parent:  # Stop at filesystem root
+            if current.name == "yolact" or (current / "dataset").exists():
+                yolact_root = current
+                break
+            current = current.parent
+        else:
+            raise FileNotFoundError("Could not find yolact root directory with dataset folder")
+    
+    # Build dataset paths
+    dataset_base_path = yolact_root / "dataset" / "XrayInstanceSegmentationCOCO"
+    
+    # Verify paths exist
+    if not dataset_base_path.exists():
+        raise FileNotFoundError(f"Dataset directory not found: {dataset_base_path}")
+    
+    return {
+        'name': 'Base Dataset',
+        'train_images': str(dataset_base_path / "train"),
+        'train_info': str(dataset_base_path / "train" / "train.json"),
+        'valid_images': str(dataset_base_path / "valid"),
+        'valid_info': str(dataset_base_path / "valid" / "valid.json"),
+        'has_gt': True,
+        'class_names': ('Vertebra',),
+        'label_map': {1: 1}
+    }
+
+# Usage - Replace your existing vertebra_dataset definition with:
+vertebra_dataset = dataset_base.copy(get_dataset_config())
+
 
 # ----------------------- TRANSFORMS ----------------------- #
 
@@ -650,18 +701,19 @@ coco_base_config = Config({
 # ----------------------- YOLACT v1.0 CONFIGS ----------------------- #
 
 yolact_base_config = coco_base_config.copy({
-    'name': 'yolact_base',
+    'name': 'vertebra',
 
     # Dataset stuff
-    'dataset': dataset_base,
-    'num_classes': len(dataset_base.class_names) + 1,
+    'dataset': vertebra_dataset,
+    'num_classes': len(vertebra_dataset.class_names) + 1,
 
     # Image Size
     'max_size': 550,
     
     # Training params
     'lr_steps': (280000, 600000, 700000, 750000),
-    'max_iter': 800000,
+    # 'lr_steps': (197500, )
+    'max_iter': 150000,
     
     # Backbone Settings
     'backbone': resnet101_backbone.copy({
